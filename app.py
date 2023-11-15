@@ -19,7 +19,7 @@ PAGE_SIZE = 100
 
 ## According to https://learn.microsoft.com/en-us/azure/devops/integrate/concepts/rate-limits?view=azure-devops
 RATE_LIMIT = 200  # Maximum number of requests allowed per 5 minutes sliding window 
-RATE_PERIOD = 500  # Rate limit reset period in seconds (5 minutes)
+RATE_PERIOD = 300  # Rate limit reset period in seconds (5 minutes)
 
 # Initialize rate limiting variables
 request_count = 0
