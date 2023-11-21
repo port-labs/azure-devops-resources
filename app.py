@@ -105,10 +105,10 @@ def process_project_entities(projects_data: list[dict[str, Any]]):
             "identifier": project["id"],
             "title": project["name"],
             "properties": {
-                "description": project["description"],
+                "description": project.get("description"),
                 "url": project["url"],
-                "visibility": project["visibility"],
-                "last_updated_time": project["lastUpdateTime"]
+                "visibility": project.get("visibility"),
+                "last_updated_time": project.get("lastUpdateTime")
             },
             "relations": {}
         }
