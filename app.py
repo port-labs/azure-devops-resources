@@ -158,19 +158,20 @@ def process_work_item_entities(work_item_data: list[dict[str, Any]], project_id:
     blueprint_id = "azure_devops_work_item"
 
     for work_item in work_item_data:
+        field_data = work_item["fields"]
 
         entity = {
             "identifier": str(work_item["id"]),
-            "title": work_item["fields"]["System.Title"],
+            "title": field_data["System.Title"],
            "properties": {
                 "url": work_item["url"],
                 "revision": work_item["rev"],
-                "type": work_item["fields"]["System.WorkItemType"],
-                "state": work_item["fields"]["System.State"],
-                "created_date": work_item["fields"]["System.CreatedDate"],
-                "created_by": work_item["fields"]["System.CreatedBy"]["displayName"],
-                "updated_date": work_item["fields"]["System.ChangedDate"],
-                "priority": work_item["fields"]["Microsoft.VSTS.Common.Priority"]
+                "type": field_data["System.WorkItemType"],
+                "state": field_data["System.State"],
+                "created_date": field_data["System.CreatedDate"],
+                "created_by": field_data["System.CreatedBy"]["displayName"],
+                "updated_date": field_data.get("System.ChangedDate"),
+                "priority": field_data.get("Microsoft.VSTS.Common.Priority")
             },
             "relations": {
                 "project": project_id
