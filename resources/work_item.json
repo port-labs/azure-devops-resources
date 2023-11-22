@@ -24,17 +24,7 @@
         "state": {
           "icon": "DefaultProperty",
           "title": "State",
-          "type": "string",
-          "enum": [
-            "To Do",
-            "Doing",
-            "Done"
-          ],
-          "enumColors": {
-            "To Do": "blue",
-            "Doing": "yellow",
-            "Done": "green"
-          }
+          "type": "string"
         },
         "created_date": {
           "title": "Created Date",
