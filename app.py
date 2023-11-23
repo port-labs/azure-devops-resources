@@ -48,8 +48,10 @@ def get_azure_query_data(path: str, query_body: dict[str, Any]):
 
     url = f"{AZURE_DEVOPS_API_URL}/{AZURE_DEVOPS_ORG_ID}/{path}"
     response = requests.post(url=url, json=query_body, auth=azure_devops_basic_auth)
-    logger.info("Query data retrieved successfully")
-    return response.json()
+    response.raise_for_status()
+    data = response.json()
+    logger.debug(f"Query data retrieved successfully {data}")
+    return data
 
 def get_paginated_resource(path: str):
     logger.info(f"Requesting data for {path}")
@@ -196,20 +198,30 @@ def get_pipelines(project: dict[str, Any]):
 def get_work_items(project: dict[str, Any]):
     query_body = { "query": f"SELECT [Id] from WorkItems Where [System.AreaPath] = '{project['name']}'" }
     query_path = f"{project['id']}/_apis/wit/wiql?api-version=7.1-preview.2"
-    query_response = get_azure_query_data(path=query_path, query_body=query_body)
-    work_items = [item["id"] for item in query_response["workItems"]]
+    try:
+        query_response = get_azure_query_data(path=query_path, query_body=query_body)
 
-    batch_size = 200 ## The work item API can only process up to 200 IDs at a time
+        # Check if 'workItems' key is present in the response
+        if 'workItems' in query_response:
+            work_items = [item["id"] for item in query_response["workItems"]]
+            
+            batch_size = 200  # The work item API can only process up to 200 IDs at a time
 
-    # Process work items in batches
-    for i in range(0, len(work_items), batch_size):
-        batch = work_items[i:i + batch_size]
-        ids_str = ",".join(map(str, batch ))
+            # Process work items in batches
+            for i in range(0, len(work_items), batch_size):
+                batch = work_items[i:i + batch_size]
+                ids_str = ",".join(map(str, batch))
 
-        work_items_path = f"{project['id']}/_apis/wit/workitems?ids={ids_str}&api-version=7.1-preview.3"
-        for work_items_batch in get_paginated_resource(path=work_items_path):
-            logger.info(f"received work items batch with size {len(work_items_batch)}")
-            process_work_item_entities(work_item_data=work_items_batch, project_id=project["id"])
+                work_items_path = f"{project['id']}/_apis/wit/workitems?ids={ids_str}&api-version=7.1-preview.3"
+                for work_items_batch in get_paginated_resource(path=work_items_path):
+                    logger.info(f"received work items batch with size {len(work_items_batch)}")
+                    process_work_item_entities(work_item_data=work_items_batch, project_id=project["id"])
+
+        else:
+            logger.debug("Error: 'workItems' key not found in query response.")
+
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
